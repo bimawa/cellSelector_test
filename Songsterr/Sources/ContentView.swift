@@ -8,7 +8,7 @@ struct ContentView: View {
             ScrollView {
                 LazyVStack(spacing: 16) {
                     ForEach(Array(tabs.enumerated()), id: \.element.id) { index, tab in
-                        TabCell(title: tab.title, artist: tab.artist, index: index)
+                        TabCell(title: tab.title, artist: tab.artist, index: index, beatCount: tab.beatCount)
                     }
                 }
                 .padding()
