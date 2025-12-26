@@ -14,10 +14,11 @@ struct Selector: View {
             let endX = beatPositions.indices.contains(endBeat) ? beatPositions[endBeat] : 0
 
             ZStack {
+                let dragZoneOffset: CGFloat = 9
                 if startBeat != endBeat {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(Color(red: 118/255, green: 118/255, blue: 128/255).opacity(0.15))
-                        .frame(width: max(0, endX - startX))
+                        .frame(width: max(dragZoneOffset, endX - startX - 2 * dragZoneOffset))
                         .position(x: startX + (endX - startX) / 2, y: geometry.size.height / 2)
                 }
 
