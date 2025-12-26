@@ -1,89 +1,87 @@
 import SwiftUI
 
 struct Selector: View {
-    @Binding var startX: CGFloat
-    @Binding var endX: CGFloat
-    let cellWidth: CGFloat
+    @Binding var startBeat: Int
+    @Binding var endBeat: Int
+    let beatPositions: [CGFloat]
 
-    @State private var isDragging = false
-    @State private var dragStartX: CGFloat = 0
+    private let handleWidth: CGFloat = 9
+    private let handleHeight: CGFloat = 124
 
     var body: some View {
         GeometryReader { geometry in
+            let startX = beatPositions.indices.contains(startBeat) ? beatPositions[startBeat] : 0
+            let endX = beatPositions.indices.contains(endBeat) ? beatPositions[endBeat] : 0
+
             ZStack {
-                Color.black.opacity(0.15)
+                if startBeat != endBeat {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color(red: 118/255, green: 118/255, blue: 128/255).opacity(0.15))
+                        .frame(width: max(0, endX - startX))
+                        .position(x: startX + (endX - startX) / 2, y: geometry.size.height / 2)
+                }
 
-                Rectangle()
-                    .fill(Color.blue.opacity(0.3))
-                    .frame(width: max(0, endX - startX))
-                    .position(x: startX + (endX - startX) / 2, y: geometry.size.height / 2)
-                    .overlay(
-                        Rectangle()
-                            .stroke(Color.blue, lineWidth: 2)
-                            .frame(width: max(0, endX - startX))
-                            .position(x: startX + (endX - startX) / 2, y: geometry.size.height / 2)
-                    )
-
-                Circle()
-                    .fill(Color.white)
-                    .frame(width: 20, height: 20)
-                    .shadow(radius: 2)
-                    .position(x: startX, y: geometry.size.height / 2)
+                Image("HandleLeft")
+                    .resizable()
+                    .frame(width: handleWidth, height: min(handleHeight, geometry.size.height))
+                    .position(x: startX + handleWidth / 2, y: geometry.size.height / 2)
                     .gesture(
                         DragGesture()
                             .onChanged { value in
-                                let newX = max(0, min(value.location.x, endX - 20))
-                                startX = newX
+                                let newBeat = closestBeat(to: value.location.x, in: beatPositions, maxBeat: endBeat - 1)
+                                if newBeat != startBeat {
+                                    startBeat = newBeat
+                                }
                             }
                     )
 
-                Circle()
-                    .fill(Color.white)
-                    .frame(width: 20, height: 20)
-                    .shadow(radius: 2)
-                    .position(x: endX, y: geometry.size.height / 2)
+                Image("HandleRight")
+                    .resizable()
+                    .frame(width: handleWidth, height: min(handleHeight, geometry.size.height))
+                    .position(x: endX - handleWidth / 2, y: geometry.size.height / 2)
                     .gesture(
                         DragGesture()
                             .onChanged { value in
-                                let newX = max(startX + 20, min(value.location.x, cellWidth))
-                                endX = newX
+                                let newBeat = closestBeat(to: value.location.x, in: beatPositions, minBeat: startBeat + 1)
+                                if newBeat != endBeat {
+                                    endBeat = newBeat
+                                }
                             }
                     )
             }
         }
-        .contentShape(Rectangle())
-        .gesture(
-            DragGesture()
-                .onChanged { value in
-                    if !isDragging {
-                        isDragging = true
-                        dragStartX = value.startLocation.x
-                        startX = dragStartX
-                        endX = dragStartX
-                    }
-                    endX = max(startX, min(value.location.x, cellWidth))
-                }
-                .onEnded { _ in
-                    isDragging = false
-                    if endX < startX {
-                        let temp = startX
-                        startX = endX
-                        endX = temp
-                    }
-                }
-        )
+    }
+
+    private func closestBeat(to x: CGFloat, in positions: [CGFloat], minBeat: Int = 0, maxBeat: Int? = nil) -> Int {
+        let max = maxBeat ?? (positions.count - 1)
+        var closest = minBeat
+        var minDistance = abs(positions[minBeat] - x)
+
+        for i in minBeat...max {
+            let distance = abs(positions[i] - x)
+            if distance < minDistance {
+                minDistance = distance
+                closest = i
+            }
+        }
+        return closest
     }
 }
 
 #Preview {
     struct PreviewWrapper: View {
-        @State var start: CGFloat = 50
-        @State var end: CGFloat = 200
+        @State var startBeat: Int = 2
+        @State var endBeat: Int = 6
+
+        let beats: [CGFloat] = stride(from: 0, to: 400, by: 40).map { $0 }
 
         var body: some View {
-            Selector(startX: $start, endX: $end, cellWidth: 300)
-                .frame(height: 120)
-                .background(Color.gray)
+            VStack {
+                Text("Start: \(startBeat), End: \(endBeat)")
+                Selector(startBeat: $startBeat, endBeat: $endBeat, beatPositions: beats)
+                    .frame(height: 120)
+                    .background(Color.gray)
+            }
         }
     }
 
