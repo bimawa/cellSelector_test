@@ -19,7 +19,6 @@ targets:
       - path: Songsterr/Resources
     settings:
       base:
-        INFOPLIST_FILE: Songsterr/Info.plist
         PRODUCT_BUNDLE_IDENTIFIER: com.songsterr.app
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         GENERATE_INFOPLIST_FILE: YES

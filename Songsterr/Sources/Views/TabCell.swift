@@ -5,33 +5,38 @@ struct TabCell: View {
     let artist: String
     let index: Int
 
+    @State private var selectorStartX: CGFloat = 0
+    @State private var selectorEndX: CGFloat = 0
+    @State private var cellWidth: CGFloat = 0
+
     var body: some View {
-        ZStack(alignment: .bottomLeading) {
-            Image("CellBackground")
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(height: 120)
-                .clipped()
+        GeometryReader { geometry in
+            ZStack(alignment: .bottomLeading) {
+                Image("CellBackground")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(height: 120)
+                    .clipped()
 
-            LinearGradient(
-                colors: [.clear, .black.opacity(0.7)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.headline)
-                    .foregroundColor(.white)
-                Text(artist)
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.8))
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.headline)
+                        .foregroundColor(.white)
+                    Text(artist)
+                        .font(.subheadline)
+                        .foregroundColor(.white.opacity(0.8))
+                }
+                .padding()
+                Selector(startX: $selectorStartX, endX: $selectorEndX, cellWidth: cellWidth)
             }
-            .padding()
+            .onAppear {
+                cellWidth = geometry.size.width
+            }
+            .onChange(of: geometry.size.width) { _, newWidth in
+                cellWidth = newWidth
+            }
         }
         .frame(height: 120)
-        .cornerRadius(12)
-        .shadow(radius: 4)
     }
 }
 
